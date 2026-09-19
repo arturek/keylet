@@ -1,0 +1,103 @@
+name: Publish image to Docker Hub
+
+env:
+  GITEA_REGISTRY: ${{ vars.GITEA_REGISTRY }}
+  DOCKERHUB_REGISTRY: ${{ vars.DOCKERHUB_REGISTRY }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing Gitea image tag to publish
+        required: true
+        type: string
+      publish_latest:
+        description: Also update the Docker Hub latest tag
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  publish:
+    runs-on:
+      - ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate inputs and determine image names
+        shell: bash
+        env:
+          SOURCE_TAG: ${{ inputs.tag }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: |
+          if [[ ! "$SOURCE_TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo "The requested source tag is not a valid container image tag." >&2
+            exit 1
+          fi
+
+          if [ -z "$DOCKERHUB_USERNAME" ]; then
+            echo "The DOCKERHUB_USERNAME secret is not configured." >&2
+            exit 1
+          fi
+
+          if [ -z "$GITEA_REGISTRY" ]; then
+            echo "The GITEA_REGISTRY Actions variable is not configured." >&2
+            exit 1
+          fi
+
+          if [ -z "$DOCKERHUB_REGISTRY" ]; then
+            echo "The DOCKERHUB_REGISTRY Actions variable is not configured." >&2
+            exit 1
+          fi
+
+          for REGISTRY in "$GITEA_REGISTRY" "$DOCKERHUB_REGISTRY"; do
+            if [[ "$REGISTRY" == *"://"* || "$REGISTRY" == */* ]]; then
+              echo "Registry variables must contain a hostname with an optional port, without a scheme or path." >&2
+              exit 1
+            fi
+          done
+
+          SOURCE_REPOSITORY=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
+          TARGET_NAMESPACE=$(echo "$DOCKERHUB_USERNAME" | tr '[:upper:]' '[:lower:]')
+          echo "SOURCE_IMAGE=${GITEA_REGISTRY}/${SOURCE_REPOSITORY}" >> "$GITHUB_ENV"
+          echo "TARGET_IMAGE=${DOCKERHUB_REGISTRY}/${TARGET_NAMESPACE}/keylet" >> "$GITHUB_ENV"
+
+      - name: Log in to Gitea Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GITEA_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.PACKAGE_WRITE_TOKEN }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Publish selected tag
+        shell: bash
+        env:
+          SOURCE_TAG: ${{ inputs.tag }}
+        run: |
+          docker buildx imagetools create \
+            --tag "$TARGET_IMAGE:$SOURCE_TAG" \
+            "$SOURCE_IMAGE:$SOURCE_TAG"
+
+      - name: Publish latest tag
+        if: ${{ inputs.publish_latest }}
+        shell: bash
+        env:
+          SOURCE_TAG: ${{ inputs.tag }}
+        run: |
+          docker buildx imagetools create \
+            --tag "$TARGET_IMAGE:latest" \
+            "$SOURCE_IMAGE:$SOURCE_TAG"
+
+      - name: Verify published image
+        shell: bash
+        env:
+          SOURCE_TAG: ${{ inputs.tag }}
+        run: docker buildx imagetools inspect "$TARGET_IMAGE:$SOURCE_TAG"

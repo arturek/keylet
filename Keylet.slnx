@@ -1,4 +1,12 @@
 <Solution>
+  <Folder Name="/.gitea/" />
+  <Folder Name="/.gitea/workflows/">
+    <File Path=".gitea/workflows/build.yaml" />
+    <File Path=".gitea/workflows/publish-dockerhub.yaml" />
+  </Folder>
+  <Folder Name="/files/">
+    <File Path="version.json" />
+  </Folder>
   <Folder Name="/aspire/">
     <Project Path="aspire/Keylet.AppHost/Keylet.AppHost.csproj" />
   </Folder>
