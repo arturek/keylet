@@ -1,0 +1,12 @@
+@page "/Error"
+@{
+    ViewData["Title"] = "Error";
+}
+
+<section class="panel error-panel">
+    <span class="eyebrow">Client error</span>
+    <h1>The OIDC client could not complete the request.</h1>
+    <p>Inspect the client event timeline and Aspire logs for the corresponding failure.</p>
+    <a asp-page="/Index">Return to the test client</a>
+</section>
+

@@ -40,7 +40,7 @@ public static class Extensions
                 .AddHttpClientInstrumentation()
                 .AddRuntimeInstrumentation())
             .WithTracing(tracing => tracing
-                .AddSource(builder.Environment.ApplicationName, "Keylet.Events")
+                .AddSource(builder.Environment.ApplicationName, "Keylet.Events", "Keylet.TestClient.Events")
                 .AddAspNetCoreInstrumentation(options =>
                     options.Filter = context =>
                         !context.Request.Path.StartsWithSegments(HealthEndpointPath)

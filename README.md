@@ -14,6 +14,7 @@ It supports:
 - structured event logs, custom event spans, ASP.NET Core spans, runtime/HTTP metrics, and OTLP export;
 - health endpoints at `/health` and `/alive`;
 - an Aspire AppHost and an OCI image definition.
+- a separate ASP.NET Core test client that exercises login, userinfo, claims, session cookies, events, and logout.
 
 > Keylet provides no authentication before impersonation. Never expose it as a production or shared authority.
 
@@ -22,9 +23,19 @@ It supports:
 ```powershell
 aspire start --non-interactive
 aspire wait keylet --non-interactive
+aspire wait test-client --non-interactive
 ```
 
-Use the HTTPS endpoint shown by `aspire describe` as the OIDC authority. A consuming project in the same AppHost can receive it without hard-coding the Aspire-assigned port:
+Open the `test-client` HTTPS endpoint shown by `aspire describe`. Its **Sign in with Keylet** button starts the real authorization-code flow, and **Sign out through Keylet** exercises end-session and the signed-out callback. The page shows:
+
+- authenticated name, stable subject, email, roles, and cookie issue/expiry metadata;
+- every resulting claim and its issuer;
+- the client's OIDC middleware events without codes, tokens, PKCE verifiers, cookies, or secrets;
+- a link to Keylet's provider-side `/events` timeline.
+
+The AppHost injects Keylet's allocated HTTPS endpoint into the test client and the test client's callback endpoints into Keylet, so the flow does not depend on hard-coded Aspire proxy ports.
+
+A different consuming project in the same AppHost can receive the authority the same way:
 
 ```csharp
 var keylet = builder.AddProject<Projects.Keylet>("keylet")
@@ -38,6 +49,16 @@ builder.AddProject<Projects.MyApp>("app")
 ```
 
 The application's browser callback URI still has to appear in `Keylet:Clients[*]:RedirectUris`.
+
+## Test client outside Aspire
+
+The defaults use Keylet at `https://localhost:7284` and the client at `https://localhost:7294`:
+
+```powershell
+dotnet run --project .\src\Keylet.TestClient\Keylet.TestClient.csproj --launch-profile https
+```
+
+Override `Authentication:Keylet:Authority`, `ClientId`, `ClientSecret`, or `RequireHttpsMetadata` through normal ASP.NET Core configuration when testing another Keylet instance. The test client intentionally uses `SaveTokens = false`; it proves token exchange and validation without persisting token values in its cookie.
 
 ## Configuration
 

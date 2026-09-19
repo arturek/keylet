@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Keylet\Keylet.csproj" />
+    <ProjectReference Include="..\..\src\Keylet.TestClient\Keylet.TestClient.csproj" />
   </ItemGroup>
 
 </Project>
-

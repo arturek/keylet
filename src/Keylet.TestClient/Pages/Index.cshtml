@@ -1,0 +1,152 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "OIDC session";
+}
+
+<section class="hero">
+    <div>
+        <span class="eyebrow">Real OIDC client</span>
+        <h1>Exercise the complete Keylet round trip.</h1>
+        <p>This application uses ASP.NET Core's cookie and OpenID Connect handlers. It does not share authentication state with Keylet.</p>
+    </div>
+    <div class="actions">
+        @if (Model.IsAuthenticated)
+        {
+            <form method="post" asp-page-handler="Logout">
+                <button class="danger" type="submit">Sign out through Keylet</button>
+            </form>
+        }
+        else
+        {
+            <form method="post" asp-page-handler="Login">
+                <button type="submit">Sign in with Keylet</button>
+            </form>
+        }
+    </div>
+</section>
+
+<section class="status-card @(Model.IsAuthenticated ? "authenticated" : "anonymous")">
+    <div>
+        <span class="status-dot" aria-hidden="true"></span>
+        <strong>@(Model.IsAuthenticated ? "Authenticated" : "Anonymous")</strong>
+    </div>
+    @if (Model.IsAuthenticated)
+    {
+        <span>@Model.DisplayName</span>
+    }
+    else
+    {
+        <span>No local client cookie is active.</span>
+    }
+</section>
+
+<div class="grid">
+    <section class="panel">
+        <div class="panel-heading">
+            <div>
+                <span class="eyebrow">Session</span>
+                <h2>Login details</h2>
+            </div>
+        </div>
+
+        @if (Model.IsAuthenticated && Model.Session is not null)
+        {
+            <dl class="details">
+                <dt>Name</dt><dd>@Model.DisplayName</dd>
+                <dt>Subject</dt><dd><code>@(Model.Subject ?? "—")</code></dd>
+                <dt>Email</dt><dd>@(Model.Email ?? "—")</dd>
+                <dt>Roles</dt><dd>@(Model.Roles.Count == 0 ? "—" : string.Join(", ", Model.Roles))</dd>
+                <dt>Authentication type</dt><dd><code>@(User.Identity?.AuthenticationType ?? "—")</code></dd>
+                <dt>Issued</dt><dd>@FormatTimestamp(Model.Session.IssuedUtc)</dd>
+                <dt>Expires</dt><dd>@FormatTimestamp(Model.Session.ExpiresUtc)</dd>
+                <dt>Persistent</dt><dd>@Model.Session.IsPersistent</dd>
+                <dt>Saved tokens</dt><dd>No — token values are intentionally not stored in the cookie.</dd>
+            </dl>
+        }
+        else
+        {
+            <p class="empty">Sign in to inspect the resulting local session.</p>
+        }
+    </section>
+
+    <section class="panel">
+        <div class="panel-heading">
+            <div>
+                <span class="eyebrow">Principal</span>
+                <h2>Claims</h2>
+            </div>
+            <span class="count">@Model.Claims.Count</span>
+        </div>
+
+        @if (Model.Claims.Count > 0)
+        {
+            <div class="claim-list">
+                @foreach (var claim in Model.Claims)
+                {
+                    <article class="claim">
+                        <code>@claim.Type</code>
+                        <span>@claim.Value</span>
+                        <small>@claim.Issuer</small>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="empty">No authenticated claims are available.</p>
+        }
+    </section>
+</div>
+
+<section class="panel events-panel">
+    <div class="panel-heading">
+        <div>
+            <span class="eyebrow">Middleware timeline</span>
+            <h2>Client events</h2>
+        </div>
+        <div class="panel-links">
+            <a href="@Model.KeyletEventsUrl" target="_blank" rel="noreferrer">Open Keylet events</a>
+            <a asp-page="/Index">Refresh</a>
+        </div>
+    </div>
+    <p>Newest first. Codes, tokens, PKCE verifiers, cookies, and the client secret are never recorded.</p>
+
+    @if (Model.Events.Count == 0)
+    {
+        <p class="empty">No client events have been recorded.</p>
+    }
+    else
+    {
+        <div class="event-list">
+            @foreach (var entry in Model.Events)
+            {
+                <article class="event">
+                    <div class="event-time">
+                        <code>#@entry.Sequence</code>
+                        <time datetime="@entry.Timestamp.ToString("O")">@entry.Timestamp.ToLocalTime().ToString("HH:mm:ss.fff")</time>
+                    </div>
+                    <div>
+                        <h3>@entry.Type</h3>
+                        <p>@entry.Summary</p>
+                        @if (entry.Properties.Count > 0)
+                        {
+                            <dl class="event-properties">
+                                @foreach (var property in entry.Properties)
+                                {
+                                    <dt>@property.Key</dt><dd>@(property.Value ?? "—")</dd>
+                                }
+                            </dl>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>
+
+@functions {
+    private static string FormatTimestamp(DateTimeOffset? value) =>
+        value?.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss zzz") ?? "—";
+}
+

@@ -5,9 +5,9 @@
   <Folder Name="/src/">
     <Project Path="src/Keylet/Keylet.csproj" />
     <Project Path="src/Keylet.ServiceDefaults/Keylet.ServiceDefaults.csproj" />
+    <Project Path="src/Keylet.TestClient/Keylet.TestClient.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Keylet.Tests/Keylet.Tests.csproj" />
   </Folder>
 </Solution>
-
