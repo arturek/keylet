@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/aspire/">
+    <Project Path="aspire/Keylet.AppHost/Keylet.AppHost.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Keylet/Keylet.csproj" />
+    <Project Path="src/Keylet.ServiceDefaults/Keylet.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Keylet.Tests/Keylet.Tests.csproj" />
+  </Folder>
+</Solution>
+

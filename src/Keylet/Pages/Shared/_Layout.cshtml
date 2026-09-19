@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · Keylet</title>
+    <link rel="stylesheet" href="~/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <a class="brand" asp-page="/Index">Keylet</a>
+        <nav aria-label="Main navigation">
+            <a asp-page="/Index">Configuration</a>
+            <a asp-page="/Events">Events</a>
+            <a href="/.well-known/openid-configuration">Discovery</a>
+        </nav>
+    </header>
+    <main>
+        @RenderBody()
+    </main>
+    <footer>Test identity provider — never use as a production authority.</footer>
+</body>
+</html>
+

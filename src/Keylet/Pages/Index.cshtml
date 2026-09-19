@@ -1,0 +1,67 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Configuration";
+}
+
+<section class="hero">
+    <div>
+        <span class="eyebrow">OIDC test authority</span>
+        <h1>Predictable identities, zero account setup.</h1>
+        <p>Keylet implements the Keyla-compatible authorization-code flow for local and automated testing.</p>
+    </div>
+    <div class="mode mode-@Model.Options.Mode.ToString().ToLowerInvariant()">
+        <span>Mode</span>
+        <strong>@Model.Options.Mode</strong>
+        @if (Model.Options.Mode == KeyletMode.Automatic)
+        {
+            <small>Default: @Model.Options.AutomaticUser</small>
+        }
+    </div>
+</section>
+
+<div class="warning"><strong>Deliberately insecure:</strong> any visitor can become any configured identity.</div>
+
+<section>
+    <h2>Users <span class="count">@Model.Options.Users.Count</span></h2>
+    <div class="cards">
+        @foreach (var user in Model.Options.Users)
+        {
+            <article class="card">
+                <h3>@user.Name</h3>
+                <dl>
+                    <dt>Subject</dt><dd><code>@user.Subject</code></dd>
+                    <dt>Username</dt><dd>@(user.PreferredUsername ?? "—")</dd>
+                    <dt>Email</dt><dd>@(user.Email ?? "—")</dd>
+                    <dt>Roles</dt><dd>@(user.Roles.Count == 0 ? "—" : string.Join(", ", user.Roles))</dd>
+                </dl>
+            </article>
+        }
+    </div>
+</section>
+
+<section>
+    <h2>Clients <span class="count">@Model.Options.Clients.Count</span></h2>
+    <div class="cards">
+        @foreach (var client in Model.Options.Clients)
+        {
+            <article class="card">
+                <h3>@(client.DisplayName ?? client.ClientId)</h3>
+                <dl>
+                    <dt>Client ID</dt><dd><code>@client.ClientId</code></dd>
+                    <dt>Type</dt><dd>@(string.IsNullOrWhiteSpace(client.ClientSecret) ? "Public" : "Confidential")</dd>
+                    <dt>Scopes</dt><dd>@string.Join(" ", client.AllowedScopes)</dd>
+                    <dt>PKCE</dt><dd>@(client.RequirePkce ? "Required" : "Optional")</dd>
+                </dl>
+                <details>
+                    <summary>Redirect URIs</summary>
+                    @foreach (var uri in client.RedirectUris)
+                    {
+                        <code class="uri">@uri</code>
+                    }
+                </details>
+            </article>
+        }
+    </div>
+</section>
+

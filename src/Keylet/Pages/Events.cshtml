@@ -1,0 +1,42 @@
+@page
+@model EventsModel
+@{
+    ViewData["Title"] = "Events";
+}
+
+<section class="page-heading">
+    <span class="eyebrow">In-memory timeline</span>
+    <h1>Events</h1>
+    <p>Newest first. The same domain events are emitted as structured logs and OpenTelemetry spans.</p>
+</section>
+
+@if (Model.Events.Count == 0)
+{
+    <p class="empty">No events have been recorded.</p>
+}
+else
+{
+    <div class="event-list">
+        @foreach (var entry in Model.Events)
+        {
+            <article class="event">
+                <div class="event-meta">
+                    <code>#@entry.Sequence</code>
+                    <time datetime="@entry.Timestamp.ToString("O")">@entry.Timestamp.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff zzz")</time>
+                </div>
+                <h2>@entry.Type</h2>
+                <p>@entry.Summary</p>
+                @if (entry.Properties.Count > 0)
+                {
+                    <dl>
+                        @foreach (var property in entry.Properties)
+                        {
+                            <dt>@property.Key</dt><dd>@(property.Value ?? "—")</dd>
+                        }
+                    </dl>
+                }
+            </article>
+        }
+    </div>
+}
+

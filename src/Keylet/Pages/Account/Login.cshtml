@@ -1,0 +1,29 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Choose account";
+}
+
+<section class="login-panel">
+    <span class="eyebrow">Test sign-in</span>
+    <h1>Choose an identity</h1>
+    <p>No password is required. The selected configured identity will be returned to <strong>@(Model.ClientName ?? "the requesting application")</strong>.</p>
+
+    <div class="account-list">
+        @foreach (var user in Model.Users)
+        {
+            <form method="post">
+                <input type="hidden" asp-for="ReturnUrl" />
+                <input type="hidden" name="Subject" value="@user.Subject" />
+                <button type="submit" class="account-button">
+                    <span>
+                        <strong>@user.Name</strong>
+                        <small>@(user.Email ?? user.PreferredUsername ?? user.Subject)</small>
+                    </span>
+                    <span class="roles">@(user.Roles.Count == 0 ? "No roles" : string.Join(" · ", user.Roles))</span>
+                </button>
+            </form>
+        }
+    </div>
+</section>
+
