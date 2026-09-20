@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>Keylet</title>
+  <rect width="64" height="64" rx="14" fill="#0d1117"/>
+  <path fill="#6ee7b7" d="M32 10c-10.5 0-19 8.5-19 19 0 6.2 3 11.7 7.7 15.2V54h22.6v-9.8C48 40.7 51 35.2 51 29c0-10.5-8.5-19-19-19Zm0 8a11 11 0 0 1 6 20.2V46H26v-7.8A11 11 0 0 1 32 18Z"/>
+  <circle cx="32" cy="29" r="4" fill="#0d1117"/>
+  <path fill="#34d399" d="M26 50h12v4H26z"/>
+</svg>
