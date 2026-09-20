@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Keylet\Keylet.csproj" />
+    <ProjectReference Include="..\..\src\Keylet.Hosting.Aspire\Keylet.Hosting.Aspire.csproj"
+                      IsAspireProjectResource="false" />
     <ProjectReference Include="..\..\src\Keylet.TestClient\Keylet.TestClient.csproj" />
   </ItemGroup>
 

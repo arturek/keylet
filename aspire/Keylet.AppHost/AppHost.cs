@@ -1,19 +1,52 @@
+using Aspire.Hosting.ApplicationModel;
+using Keylet.Hosting.Aspire;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
-var keylet = builder.AddProject<Projects.Keylet>("keylet")
-    .WithExternalHttpEndpoints();
+var useContainerParameter = builder.AddParameter(
+    "keylet-use-container",
+    "true",
+    publishValueAsDefault: true);
+var useContainerValue = await useContainerParameter.Resource.GetValueAsync(CancellationToken.None);
+if (!bool.TryParse(useContainerValue, out var useContainer))
+{
+    throw new InvalidOperationException(
+        $"The Parameters:keylet-use-container value '{useContainerValue}' must be true or false.");
+}
 
-var testClient = builder.AddProject<Projects.Keylet_TestClient>("test-client")
-    .WithExternalHttpEndpoints()
-    .WithEnvironment("Authentication__Keylet__Authority", keylet.GetEndpoint("https"))
-    .WaitFor(keylet);
+if (useContainer)
+{
+    var keylet = builder.AddKeylet("keylet");
+    AddTestClient(keylet, endpointName: "http", requireHttpsMetadata: false);
+}
+else
+{
+    var keylet = builder.AddProject<Projects.Keylet>("keylet")
+        .WithExternalHttpEndpoints();
+    AddTestClient(keylet, endpointName: "https", requireHttpsMetadata: true);
+}
 
-keylet
-    .WithEnvironment(
-        "Keylet__Clients__1__RedirectUris__0",
-        $"{testClient.GetEndpoint("https")}/signin-oidc")
-    .WithEnvironment(
-        "Keylet__Clients__1__PostLogoutRedirectUris__0",
-        $"{testClient.GetEndpoint("https")}/signout-callback-oidc");
+void AddTestClient<T>(
+    IResourceBuilder<T> keylet,
+    string endpointName,
+    bool requireHttpsMetadata)
+    where T : IResourceWithEnvironment, IResourceWithEndpoints
+{
+    var testClient = builder.AddProject<Projects.Keylet_TestClient>("test-client")
+        .WithExternalHttpEndpoints()
+        .WithKeyletAuthentication(
+            keylet,
+            "keylet-test-client",
+            "keylet-test-client-secret",
+            endpointName: endpointName,
+            requireHttpsMetadata: requireHttpsMetadata)
+        .WaitFor(builder.CreateResourceBuilder<IResource>(keylet.Resource));
+
+    keylet.WithKeyletClient(
+        testClient,
+        clientId: "keylet-test-client",
+        clientSecret: "keylet-test-client-secret",
+        clientIndex: 1);
+}
 
 builder.Build().Run();

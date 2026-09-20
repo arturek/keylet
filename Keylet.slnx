@@ -12,6 +12,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Keylet/Keylet.csproj" />
+    <Project Path="src/Keylet.Hosting.Aspire/Keylet.Hosting.Aspire.csproj" />
     <Project Path="src/Keylet.ServiceDefaults/Keylet.ServiceDefaults.csproj" />
     <Project Path="src/Keylet.TestClient/Keylet.TestClient.csproj" />
   </Folder>

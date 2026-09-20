@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>true</IsPackable>
+    <IsAspireProjectResource>false</IsAspireProjectResource>
+    <PackageId>Keylet.Hosting.Aspire</PackageId>
+    <Title>Keylet hosting integration for .NET Aspire</Title>
+    <Description>Run the Keylet development OpenID Connect provider from a .NET Aspire AppHost.</Description>
+    <Authors>Artur Ejsmont</Authors>
+    <PackageTags>aspire;keylet;openid;openid-connect;oidc;testing;development</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/arturek/keylet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/arturek/keylet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting" Version="13.5.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

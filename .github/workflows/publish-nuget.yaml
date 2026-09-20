@@ -1,0 +1,76 @@
+name: Publish NuGet package
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/publish-nuget.yaml'
+      - 'src/Keylet.Hosting.Aspire/**'
+      - 'version.json'
+      - 'global.json'
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install NBGV
+        id: nbgv
+        uses: dotnet/nbgv@v0.5.2
+
+      - name: Restore
+        run: dotnet restore src/Keylet.Hosting.Aspire/Keylet.Hosting.Aspire.csproj
+
+      - name: Build
+        run: dotnet build src/Keylet.Hosting.Aspire/Keylet.Hosting.Aspire.csproj --configuration Release --no-restore
+
+      - name: Pack
+        run: >-
+          dotnet pack src/Keylet.Hosting.Aspire/Keylet.Hosting.Aspire.csproj
+          --configuration Release
+          --no-build
+          --output artifacts
+          /p:ContinuousIntegrationBuild=true
+          /p:PackageVersion=${{ steps.nbgv.outputs.NuGetPackageVersion }}
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: keylet-hosting-aspire-package
+          path: artifacts/*
+
+      - name: NuGet login (OIDC to temporary API key)
+        if: github.event_name != 'pull_request'
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push package to NuGet.org
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: >-
+          dotnet nuget push "artifacts/Keylet.Hosting.Aspire.*.nupkg"
+          --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate

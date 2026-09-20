@@ -26,6 +26,14 @@ aspire wait keylet --non-interactive
 aspire wait test-client --non-interactive
 ```
 
+The AppHost uses the `arturek/keylet` container image by default. To debug the local `src/Keylet` project instead, set the Aspire parameter to `false` before starting it:
+
+```powershell
+aspire start --non-interactive -- Parameters:keylet-use-container=false
+```
+
+The selected resource keeps the same `keylet` name and endpoint contract, so the test client wiring remains unchanged.
+
 Open the `test-client` HTTPS endpoint shown by `aspire describe`. Its **Sign in with Keylet** button starts the real authorization-code flow, and **Sign out through Keylet** exercises end-session and the signed-out callback. The page shows:
 
 - authenticated name, stable subject, email, roles, and cookie issue/expiry metadata;
@@ -157,6 +165,33 @@ Configure these repository secrets before using the Docker Hub workflow:
 
 - `DOCKERHUB_USERNAME`: Docker Hub account or namespace that owns the `keylet` repository;
 - `DOCKERHUB_TOKEN`: Docker Hub access token with permission to push that repository.
+
+### Aspire hosting package
+
+The `Keylet.Hosting.Aspire` package runs the Docker Hub image directly from an Aspire AppHost:
+
+```powershell
+dotnet add package Keylet.Hosting.Aspire
+```
+
+```csharp
+using Keylet.Hosting.Aspire;
+
+var keylet = builder.AddKeylet("keylet");
+var app = builder.AddProject<Projects.MyApp>("app")
+    .WithExternalHttpEndpoints()
+    .WithKeyletAuthentication(keylet, "my-app", "local-development-secret")
+    .WaitFor(keylet);
+
+keylet.WithKeyletClient(
+    app,
+    clientId: "my-app",
+    clientSecret: "local-development-secret");
+```
+
+The helper defaults `RequireHttpsMetadata` to `false` because the Docker image exposes HTTP for local development. Set `requireHttpsMetadata: true` when Keylet is fronted by HTTPS.
+
+`.github/workflows/publish-nuget.yaml` builds the package on pull requests and publishes it on tags or manual runs using NuGet Trusted Publishing. Configure a NuGet Trusted Publishing policy for repository `arturek/keylet`, workflow `publish-nuget.yaml`, and provide the NuGet profile name as the `NUGET_USER` repository secret. The workflow requests a short-lived OIDC API key and does not require a long-lived NuGet API key.
 
 ## Validation
 
