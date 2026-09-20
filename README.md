@@ -137,26 +137,24 @@ wslc build -f src/Keylet/Dockerfile -t keylet:local .
 
 The image listens on port `8080`. Mount a JSON configuration file or provide indexed environment variables such as `Keylet__Users__0__Subject` and `Keylet__Clients__0__RedirectUris__0`.
 
-### Gitea and Docker Hub
+### GitHub Actions, GHCR, and Docker Hub
 
-`.gitea/workflows/build.yaml` builds the image for pull requests and builds and publishes it for `main` pushes or manual runs. Published images use the repository path in the configured Gitea registry, for example:
+`.github/workflows/build.yaml` builds the image for pull requests and builds and publishes it for `main` pushes or manual runs. Published images use the repository path in GitHub Container Registry, for example:
 
 ```text
-<GITEA_REGISTRY>/arturek/keylet:1.0.0-beta.1
+ghcr.io/arturek/keylet:1.0.0-beta.1
 ```
 
-Configure these non-secret Actions variables at repository, owner/organization, or global scope. Values are registry hostnames with an optional port and must not include `https://` or a path:
+Configure this non-secret Actions variable at repository, owner/organization, or global scope. The value is the Docker Hub registry hostname with an optional port and must not include `https://` or a path:
 
-- `GITEA_REGISTRY`: registry that receives normal builds, for example `gitea.example.test`;
 - `DOCKERHUB_REGISTRY`: Docker Hub registry hostname, normally `docker.io`.
 
-Configure the existing `PACKAGE_WRITE_TOKEN` repository secret with package write access. Pull-request runs do not log in or publish images. A successful `main` build publishes both the NBGV version and `latest`.
+The build workflow uses the repository-provided `GITHUB_TOKEN` with `packages: write` permission to publish to GHCR. Pull-request runs do not log in or publish images. A successful `main` build publishes both the NBGV version and `latest`.
 
-`.gitea/workflows/publish-dockerhub.yaml` is manual only. Supply an existing Gitea image tag when starting it. It promotes that exact image to `<DOCKERHUB_REGISTRY>/<DOCKERHUB_USERNAME>/keylet:<tag>` without rebuilding it and can optionally update `latest`.
+`.github/workflows/publish-dockerhub.yaml` is manual only. Supply an existing GHCR image tag when starting it. It promotes that exact image to `<DOCKERHUB_REGISTRY>/<DOCKERHUB_USERNAME>/keylet:<tag>` without rebuilding it and can optionally update `latest`.
 
 Configure these repository secrets before using the Docker Hub workflow:
 
-- `PACKAGE_WRITE_TOKEN`: token that can read the source image from the Gitea package registry;
 - `DOCKERHUB_USERNAME`: Docker Hub account or namespace that owns the `keylet` repository;
 - `DOCKERHUB_TOKEN`: Docker Hub access token with permission to push that repository.
 

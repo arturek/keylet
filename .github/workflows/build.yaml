@@ -1,7 +1,7 @@
 name: Build image
 
 env:
-  REGISTRY: ${{ vars.GITEA_REGISTRY }}
+  REGISTRY: ghcr.io
 
 on:
   workflow_dispatch:
@@ -18,8 +18,10 @@ on:
 
 jobs:
   build:
-    runs-on:
-      - ubuntu-latest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -58,26 +60,13 @@ jobs:
           IMAGE_REPOSITORY=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
           echo "IMAGE_REPOSITORY=${IMAGE_REPOSITORY}" >> "$GITHUB_ENV"
 
-      - name: Validate registry configuration
-        shell: bash
-        run: |
-          if [ -z "$REGISTRY" ]; then
-            echo "The GITEA_REGISTRY Actions variable is not configured." >&2
-            exit 1
-          fi
-
-          if [[ "$REGISTRY" == *"://"* || "$REGISTRY" == */* ]]; then
-            echo "GITEA_REGISTRY must be a registry hostname with an optional port, without a scheme or path." >&2
-            exit 1
-          fi
-
-      - name: Log in to Gitea Container Registry
+      - name: Log in to GitHub Container Registry
         if: ${{ github.event_name != 'pull_request' }}
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.PACKAGE_WRITE_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract Docker metadata
         id: meta

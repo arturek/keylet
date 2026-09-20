@@ -1,8 +1,8 @@
 <Solution>
-  <Folder Name="/.gitea/" />
-  <Folder Name="/.gitea/workflows/">
-    <File Path=".gitea/workflows/build.yaml" />
-    <File Path=".gitea/workflows/publish-dockerhub.yaml" />
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/build.yaml" />
+    <File Path=".github/workflows/publish-dockerhub.yaml" />
   </Folder>
   <Folder Name="/files/">
     <File Path="version.json" />
