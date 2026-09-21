@@ -18,6 +18,12 @@ It supports:
 
 > Keylet provides no authentication before impersonation. Never expose it as a production or shared authority.
 
+## Screenshots
+
+<p><img src="docs/images/choose-identity.jpg" alt="Keylet identity picker" width="720"></p>
+
+<p><img src="docs/images/keylet-configuration.jpg" alt="Keylet configuration page" width="720"></p>
+
 ## Run with Aspire
 
 ```powershell

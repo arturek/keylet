@@ -2,6 +2,17 @@
 
 Run the [`arturek/keylet`](https://hub.docker.com/r/arturek/keylet) development OpenID Connect provider from a .NET Aspire AppHost.
 
+## Features
+
+- Adds the Keylet container to an Aspire AppHost without requiring a local image build.
+- Supports image, tag, endpoint, port, health-check, and external-endpoint configuration.
+- Provides typed provider configuration for users, clients, scopes, PKCE, automatic login, and login hints.
+- Wires a consuming resource to Keylet with `WithKeyletAuthentication`.
+- Registers browser redirect and post-logout URIs with `WithKeyletClient`.
+- Handles both Aspire localhost and container-network callback addresses for project resources.
+
+<p><img src="images/choose-identity.jpg" alt="Keylet identity picker" width="720"></p>
+
 ```csharp
 using Keylet.Hosting.Aspire;
 
