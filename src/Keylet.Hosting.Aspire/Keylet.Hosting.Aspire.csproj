@@ -26,9 +26,6 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
-    <None Include="..\..\docs\images\choose-identity.jpg"
-          Pack="true"
-          PackagePath="images\choose-identity.jpg" />
   </ItemGroup>
 
 </Project>

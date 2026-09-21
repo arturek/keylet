@@ -11,7 +11,7 @@ Run the [`arturek/keylet`](https://hub.docker.com/r/arturek/keylet) development 
 - Registers browser redirect and post-logout URIs with `WithKeyletClient`.
 - Handles both Aspire localhost and container-network callback addresses for project resources.
 
-<p><img src="images/choose-identity.jpg" alt="Keylet identity picker" width="720"></p>
+![Keylet identity picker](https://raw.githubusercontent.com/arturek/keylet/main/docs/images/choose-identity.jpg)
 
 ```csharp
 using Keylet.Hosting.Aspire;
@@ -21,7 +21,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 var keylet = builder.AddKeylet("keylet", options =>
 {
     // To use a specific image tag, uncomment and change this value, for example:
-    // options.ImageTag = "1.0.5-beta";
+    // options.ImageTag = "1.0.7-beta";
     options.Configuration.Mode = KeyletMode.Automatic;
     options.Configuration.AutomaticUser = "admin";
 });
