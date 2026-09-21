@@ -9,7 +9,8 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var keylet = builder.AddKeylet("keylet", options =>
 {
-    options.ImageTag = "1.0.0";
+    // To use a specific image tag, uncomment and change this value, for example:
+    // options.ImageTag = "1.0.5-beta";
     options.Configuration.Mode = KeyletMode.Automatic;
     options.Configuration.AutomaticUser = "admin";
 });

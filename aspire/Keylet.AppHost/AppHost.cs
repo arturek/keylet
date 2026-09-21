@@ -3,11 +3,11 @@ using Keylet.Hosting.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var useContainerParameter = builder.AddParameter(
+var useContainerValue = builder.Configuration["Parameters:keylet-use-container"] ?? "true";
+builder.AddParameter(
     "keylet-use-container",
-    "true",
+    useContainerValue,
     publishValueAsDefault: true);
-var useContainerValue = await useContainerParameter.Resource.GetValueAsync(CancellationToken.None);
 if (!bool.TryParse(useContainerValue, out var useContainer))
 {
     throw new InvalidOperationException(

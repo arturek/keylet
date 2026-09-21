@@ -141,7 +141,7 @@ nav a:hover {
 }
 
 main {
-    padding-block: 4rem;
+    padding-block: 2.5rem 4rem;
 }
 
 footer {
@@ -166,8 +166,13 @@ h1 {
     margin-bottom: 1.4rem;
 }
 
+.hero h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 0;
+}
+
 h2 {
-    margin-top: 3.5rem;
+    margin-top: 2.5rem;
     font-size: 1.45rem;
 }
 
@@ -189,13 +194,13 @@ p {
 .hero {
     display: grid;
     grid-template-columns: 1fr auto;
-    align-items: end;
-    gap: 3rem;
+    align-items: center;
+    gap: 2rem;
 }
 
 .mode {
     min-width: 180px;
-    padding: 1.25rem;
+    padding: .9rem 1rem;
     border: 1px solid var(--border);
     background: var(--surface);
     border-radius: .75rem;
@@ -218,8 +223,8 @@ p {
     border-left: 3px solid var(--warning);
     background: rgba(251, 191, 36, .08);
     color: #fde68a;
-    margin-block: 2.5rem;
-    padding: 1rem 1.25rem;
+    margin-block: 1.5rem 2rem;
+    padding: .8rem 1rem;
 }
 
 html[data-theme="light"] .warning {
