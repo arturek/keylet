@@ -12,6 +12,34 @@
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+html[data-theme="light"] {
+    color-scheme: light;
+    --background: #f4f7fb;
+    --surface: #ffffff;
+    --surface-strong: #f8fafc;
+    --border: #d5dee9;
+    --text: #172033;
+    --muted: #526176;
+    --accent: #047857;
+    --accent-strong: #059669;
+    --warning: #b45309;
+}
+
+@media (prefers-color-scheme: light) {
+    html:not([data-theme="dark"]) {
+        color-scheme: light;
+        --background: #f4f7fb;
+        --surface: #ffffff;
+        --surface-strong: #f8fafc;
+        --border: #d5dee9;
+        --text: #172033;
+        --muted: #526176;
+        --accent: #047857;
+        --accent-strong: #059669;
+        --warning: #b45309;
+    }
+}
+
 * {
     box-sizing: border-box;
 }
@@ -66,6 +94,50 @@ nav a {
 
 nav a:hover {
     color: var(--text);
+}
+
+.theme-toggle {
+    display: inline-grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+    margin-right: .15rem;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font: inherit;
+    transition: border-color .15s ease, background .15s ease, transform .15s ease;
+}
+
+.theme-toggle:hover {
+    border-color: var(--accent-strong);
+    background: var(--surface-strong);
+    transform: translateY(-1px);
+}
+
+.theme-toggle:focus-visible {
+    border-color: var(--accent-strong);
+    outline: 2px solid var(--accent-strong);
+    outline-offset: 2px;
+}
+
+.theme-toggle svg {
+    display: none;
+    width: 1.15rem;
+    height: 1.15rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+}
+
+.theme-toggle[data-theme="auto"] .theme-icon-auto,
+.theme-toggle[data-theme="light"] .theme-icon-light,
+.theme-toggle[data-theme="dark"] .theme-icon-dark {
+    display: block;
 }
 
 main {
@@ -148,6 +220,24 @@ p {
     color: #fde68a;
     margin-block: 2.5rem;
     padding: 1rem 1.25rem;
+}
+
+html[data-theme="light"] .warning {
+    color: #92400e;
+}
+
+html[data-theme="light"] code {
+    color: #6d28d9;
+}
+
+@media (prefers-color-scheme: light) {
+    html:not([data-theme="dark"]) .warning {
+        color: #92400e;
+    }
+
+    html:not([data-theme="dark"]) code {
+        color: #6d28d9;
+    }
 }
 
 .count {
@@ -346,4 +436,3 @@ summary {
         text-align: left;
     }
 }
-
