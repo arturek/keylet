@@ -18,13 +18,7 @@ using Keylet.Hosting.Aspire;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var keylet = builder.AddKeylet("keylet", options =>
-{
-    // To use a specific image tag, uncomment and change this value, for example:
-    // options.ImageTag = "1.0.7-beta";
-    options.Configuration.Mode = KeyletMode.Automatic;
-    options.Configuration.AutomaticUser = "admin";
-});
+var keylet = builder.AddKeylet();
 
 var app = builder.AddProject<Projects.MyApp>("app")
     .WithExternalHttpEndpoints()

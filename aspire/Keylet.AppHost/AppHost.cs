@@ -16,7 +16,7 @@ if (!bool.TryParse(useContainerValue, out var useContainer))
 
 if (useContainer)
 {
-    var keylet = builder.AddKeylet("keylet");
+    var keylet = builder.AddKeylet();
     AddTestClient(keylet, endpointName: "http", requireHttpsMetadata: false);
 }
 else

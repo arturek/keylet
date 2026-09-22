@@ -12,6 +12,11 @@ public static class KeyletResourceBuilderExtensions
 
     public static IResourceBuilder<ContainerResource> AddKeylet(
         this IDistributedApplicationBuilder builder,
+        Action<KeyletResourceOptions>? configure = null) =>
+        AddKeylet(builder, "keylet", configure);
+
+    public static IResourceBuilder<ContainerResource> AddKeylet(
+        this IDistributedApplicationBuilder builder,
         [ResourceName] string name,
         Action<KeyletResourceOptions>? configure = null)
     {

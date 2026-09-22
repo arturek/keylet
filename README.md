@@ -183,7 +183,7 @@ dotnet add package Keylet.Hosting.Aspire
 ```csharp
 using Keylet.Hosting.Aspire;
 
-var keylet = builder.AddKeylet("keylet");
+var keylet = builder.AddKeylet();
 var app = builder.AddProject<Projects.MyApp>("app")
     .WithExternalHttpEndpoints()
     .WithKeyletAuthentication(keylet, "my-app", "local-development-secret")
