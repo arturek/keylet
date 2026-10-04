@@ -25,5 +25,19 @@
             </form>
         }
     </div>
-</section>
 
+    @if (Model.CanDenySignIn)
+    {
+        <form method="post" action="@(Request.PathBase + "/connect/authorize")" class="deny-sign-in">
+            @Html.AntiForgeryToken()
+            @foreach (var parameter in Model.AuthorizationParameters)
+            {
+                @foreach (var value in parameter.Value)
+                {
+                    <input type="hidden" name="@parameter.Key" value="@value" />
+                }
+            }
+            <button type="submit" name="keylet_action" value="deny" class="account-button">Deny sign-in</button>
+        </form>
+    }
+</section>

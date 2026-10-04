@@ -8,7 +8,7 @@ It supports:
 - discovery, JWKS, token, userinfo, and end-session endpoints;
 - confidential and public configured clients;
 - configured `sub`, name, username, email, verification, and role claims;
-- an interactive one-click account picker;
+- an interactive one-click account picker with a **Deny sign-in** option that returns an OIDC `access_denied` response to the requesting application;
 - automatic login with a default user and optional `login_hint` selection;
 - an in-memory event view at `/events`;
 - structured event logs, custom event spans, ASP.NET Core spans, runtime/HTTP metrics, and OTLP export;

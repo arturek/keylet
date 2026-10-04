@@ -383,6 +383,12 @@ summary {
     text-align: left;
 }
 
+.deny-sign-in {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+}
+
 .account-button:hover,
 .account-button:focus-visible {
     border-color: var(--accent-strong);

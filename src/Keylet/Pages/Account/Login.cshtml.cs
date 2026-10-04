@@ -18,6 +18,14 @@ public sealed class LoginModel(
 
     public string? ClientName { get; private set; }
 
+    public bool CanDenySignIn => IsSafeReturnUrl(ReturnUrl)
+        && string.Equals(ReturnUrl!.Split('?')[0], Request.PathBase + "/connect/authorize", StringComparison.OrdinalIgnoreCase);
+
+    public Dictionary<string, Microsoft.Extensions.Primitives.StringValues> AuthorizationParameters =>
+        CanDenySignIn && ReturnUrl!.Contains('?')
+            ? Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(ReturnUrl[(ReturnUrl.IndexOf('?') + 1)..])
+            : [];
+
     [BindProperty(SupportsGet = true)]
     public string? ReturnUrl { get; set; }
 

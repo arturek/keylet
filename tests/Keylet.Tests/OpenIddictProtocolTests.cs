@@ -18,6 +18,73 @@ public sealed class OpenIddictProtocolTests(TestContext testContext)
 {
     [TestMethod]
     [Timeout(30_000)]
+    public async Task AuthorizationCodeFlow_DenySignIn_ReturnsAccessDeniedWithoutSigningIn()
+    {
+        await using var factory = new KeyletWebApplicationFactory(automatic: false);
+        using var client = factory.CreateProtocolClient();
+        var authorization = CreateAuthorizationUri(factory, factory.RedirectUri.AbsoluteUri, loginHint: null);
+        using var challenge = await client.GetAsync(authorization.Uri, testContext.CancellationToken);
+        Assert.IsNotNull(challenge.Headers.Location);
+        var loginHtml = await client.GetStringAsync(challenge.Headers.Location, testContext.CancellationToken);
+        Assert.Contains("Deny sign-in", loginHtml);
+
+        // Submit the rendered denial form, including its original OIDC parameters.
+        var form = Regex.Match(loginHtml, "<form[^>]*class=\"deny-sign-in\"[^>]*>(?<body>.*?)</form>", RegexOptions.Singleline).Groups["body"].Value;
+        Assert.IsFalse(string.IsNullOrWhiteSpace(form));
+        var fields = Regex.Matches(form, "<input[^>]*name=\"(?<name>[^\"]+)\"[^>]*value=\"(?<value>[^\"]*)\"")
+            .Select(match => new KeyValuePair<string, string>(
+                WebUtility.HtmlDecode(match.Groups["name"].Value),
+                WebUtility.HtmlDecode(match.Groups["value"].Value)))
+            .ToList();
+        fields.Add(new("keylet_action", "deny"));
+        using var denial = await client.PostAsync("/connect/authorize", new FormUrlEncodedContent(fields), testContext.CancellationToken);
+
+        Assert.AreEqual(HttpStatusCode.Found, denial.StatusCode);
+        Assert.IsNotNull(denial.Headers.Location);
+        Assert.StartsWith(factory.RedirectUri.AbsoluteUri, denial.Headers.Location.AbsoluteUri);
+        var parameters = QueryHelpers.ParseQuery(denial.Headers.Location.Query);
+        Assert.AreEqual("access_denied", parameters["error"].ToString());
+        Assert.AreEqual("protocol-state", parameters["state"].ToString());
+        Assert.IsFalse(parameters.ContainsKey("code"));
+        Assert.IsFalse(denial.Headers.TryGetValues("Set-Cookie", out var cookies)
+            && cookies.Any(cookie => cookie.StartsWith("Keylet.Session=", StringComparison.Ordinal)));
+
+        using var retry = await client.GetAsync(authorization.Uri, testContext.CancellationToken);
+        Assert.IsNotNull(retry.Headers.Location);
+        Assert.AreEqual("/account/login", retry.Headers.Location.AbsolutePath);
+        var eventsHtml = await client.GetStringAsync("/events", testContext.CancellationToken);
+        Assert.Contains("account.sign-in-denied", eventsHtml);
+        Assert.DoesNotContain("account.selected", eventsHtml);
+    }
+
+    [TestMethod]
+    [Timeout(30_000)]
+    public async Task AuthorizationRequest_DenialWithoutAntiforgeryToken_IsRejected()
+    {
+        await using var factory = new KeyletWebApplicationFactory(automatic: false);
+        using var client = factory.CreateProtocolClient();
+        var authorization = CreateAuthorizationUri(factory, factory.RedirectUri.AbsoluteUri, loginHint: null);
+        var fields = QueryHelpers.ParseQuery(authorization.Uri[(authorization.Uri.IndexOf('?') + 1)..])
+            .ToDictionary(parameter => parameter.Key, parameter => parameter.Value.ToString());
+        fields["keylet_action"] = "deny";
+        using var response = await client.PostAsync("/connect/authorize", new FormUrlEncodedContent(fields), testContext.CancellationToken);
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.IsNull(response.Headers.Location);
+        Assert.DoesNotContain("account.sign-in-denied", await client.GetStringAsync("/events", testContext.CancellationToken));
+    }
+
+    [TestMethod]
+    [Timeout(30_000)]
+    public async Task LoginPage_WithoutAuthorizationRequest_DoesNotOfferDenial()
+    {
+        await using var factory = new KeyletWebApplicationFactory(automatic: false);
+        using var client = factory.CreateProtocolClient();
+        var html = await client.GetStringAsync("/account/login?ReturnUrl=/", testContext.CancellationToken);
+        Assert.DoesNotContain("Deny sign-in", html);
+    }
+
+    [TestMethod]
+    [Timeout(30_000)]
     public async Task AuthorizationCodeFlow_InteractiveSelection_IssuesExpectedIdentity()
     {
         await using var factory = new KeyletWebApplicationFactory(automatic: false);

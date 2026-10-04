@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Keylet.Configuration;
 using Keylet.Events;
 using Keylet.Services;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
@@ -25,10 +26,37 @@ internal static class OpenIddictEndpointRouteBuilderExtensions
         HttpContext context,
         IConfiguredUserStore users,
         IOptions<KeyletOptions> options,
-        IKeyletEventStore events)
+        IKeyletEventStore events,
+        IAntiforgery antiforgery)
     {
         var request = context.GetOpenIddictServerRequest()
             ?? throw new InvalidOperationException("The OpenID Connect authorization request was not available.");
+
+        if (HttpMethods.IsPost(context.Request.Method)
+            && context.Request.HasFormContentType
+            && (await context.Request.ReadFormAsync(context.RequestAborted))["keylet_action"] == "deny")
+        {
+            try
+            {
+                await antiforgery.ValidateRequestAsync(context);
+            }
+            catch (AntiforgeryValidationException)
+            {
+                return Results.BadRequest("The sign-in denial request is invalid.");
+            }
+
+            events.Record(
+                "account.sign-in-denied",
+                "Sign-in was denied from the interactive account picker",
+                new Dictionary<string, string?> { ["client_id"] = request.ClientId });
+
+            return Results.Forbid(
+                new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.AccessDenied,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "Sign-in was denied by the user."
+                }), [OpenIddictServerAspNetCoreDefaults.AuthenticationScheme]);
+        }
 
         KeyletUserOptions? user;
         if (options.Value.Mode == KeyletMode.Automatic)
